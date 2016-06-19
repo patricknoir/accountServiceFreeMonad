@@ -1,0 +1,57 @@
+| \gWriting a betting Account Service using Free[Monads]
+
+How to write modular pure functional applications using the power of Free Monads with Cats Library
+---
+| \gStep1: Define the model:
+
+```
+case class Account(accountNo: String)
+case class Selection(id: String)
+case class Bet(id: String, account: Account, selections: Set[Selection])
+```
+---
+| \gStep2: Define the AccountServiceF grammar for the Free Monad
+
+```
+sealed trait AccountServiceF[+A]
+```
+--
+```
+case class PlaceBet(bet: Bet) extends AccountServiceF[Unit]
+case class BetsForAccount(account: Account) extends AccountServiceF[Set[Bet]]
+case class SelectionsForBet(bet: Bet) extends AccountServiceF[Set[Selection]]
+```
+---
+| \gStep3: Define the method for your service
+| Import the Cats Free Monad Implementation
+/
+```
+import cats.free.Free
+```
+--
+/
+
+| \gWe now want to define the behaviour of our algebra. Each function will lift the request into the corresponding case class of our Grammar.
+
+/
+```
+trait AccountService {
+
+  type Response[A] = Free[AccountServiceF, A]
+
+  def placeBet(bet: Bet): Response[Unit] = Free.liftF(PlaceBet(bet))
+  def betsForAccount(account: Account): Response[Set[Bet]] = Free.liftF(BetsForAccount(account))
+  def selectionsForBet(bet: Bet): Response[Set[Selection]] = Free.liftF(SelectionsForBet(bet))
+
+  def selectionsPerAccount(account: Account): Response[Set[Selection]] = for {
+    bets <- betsForAccount(account)
+    sels <- bets.map(selectionsForBet).reduce { (resp1, resp2) =>
+      resp1.flatMap(s1 => resp2.map(s2 => s1 ++ s2))
+    }
+  } yield sels
+
+}
+```
+---
+| \yThank you!
+---

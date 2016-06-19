@@ -17,6 +17,8 @@ val specsVers = "3.8.2"
 val scalaVers = "2.11.8"
 val scalaBinaryVers = scalaVers
 
+val akkaVers = "2.4.7"
+
 // Dependencies
 val compilerPlugins = Seq(
   compilerPlugin("org.spire-math" %% "kind-projector"  % "0.8.0"),
@@ -29,7 +31,8 @@ val rootDependencies = Seq(
   "com.github.julien-truffaut"  %%  "monocle-generic" % monocleVers,
   "com.github.julien-truffaut"  %%  "monocle-macro"   % monocleVers,
   "com.github.julien-truffaut"  %%  "monocle-state"   % monocleVers,
-  "com.github.julien-truffaut"  %%  "monocle-refined" % monocleVers
+  "com.github.julien-truffaut"  %%  "monocle-refined" % monocleVers,
+  "com.typesafe.akka"           %%  "akka-actor"      % akkaVers
 )
 
 val testDependencies = Seq(
@@ -106,7 +109,7 @@ val dockerSettings = Seq(
     Cmd("RUN apk upgrade --update && apk add --update openjdk-jre && rm -rf /var/cache/apk/*"),
     Cmd("ADD", "opt /opt"),
     ExecCmd("RUN", "mkdir", "-p", "/var/log/recommendation"),
-    ExecCmd("ENTRYPOINT", "/opt/recommendation/bin/recommendation")
+    ExecCmd("ENTRYPOINT", "/opt/recommendation/bin/freerec")
   ),
   version in Docker := version.value
 )
